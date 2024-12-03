@@ -4,13 +4,13 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Product Image Gallery -->
         <ImageGallery 
-          :images="product.images" 
-          :alt="product.name"
+          :images="store.product.images" 
+          :alt="store.product.name"
         />
 
         <!-- Product Info -->
         <div class="space-y-4">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-left">{{ product.name }}</h1>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-left">{{ store.product.name }}</h1>
           <div class="flex items-center mb-2">
             <div class="flex text-yellow-400">
               <svg v-for="star in 5" :key="star" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -27,7 +27,7 @@
           <div class="">
             <h3 class="font-semibold text-lg mb-4 text-gray-900 dark:text-white text-left">Características del Producto</h3>
             <ul class="space-y-3">
-              <li v-for="(feature, index) in product.features" :key="index" class="text-left text-sm sm:text-lg">
+              <li v-for="(feature, index) in store.product.features" :key="index" class="text-left text-sm sm:text-lg">
                 <span class="text-gray-600 dark:text-gray-300">{{ feature }}</span>
               </li>
             </ul>
@@ -36,14 +36,14 @@
           <!-- Quantity Selection Cards -->
           <div class="grid grid-cols-3 sm:gap-4 gap-2">
             <button
-              v-for="option in quantityOptions"
+              v-for="option in store.quantityoptions"
               :key="option.quantity"
               @click="selectQuantity(option)"
               class="relative flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 focus:outline-none active:outline-none"
               :class="[
-                selectedQuantity === option.quantity 
+                store.getCurrentPurchase.quantity === option.quantity
                   ? 'border-blue-500 bg-blue-50 dark:bg-gray-900/20' 
-                  : 'border-gray-200 bg-gray-400 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700'
+                  : 'border-gray-200 bg-gray-400 dark:bg-gray-600 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700'
               ]"
             >
               <!-- Savings Badge -->
@@ -58,7 +58,7 @@
               <span 
                 class="text-2xl font-bold mb-1 text-gray-900 dark:text-white"
                 :class="[
-                selectedQuantity === option.quantity
+                store.getCurrentPurchase.quantity === option.quantity
                   ? 'text-green-600' 
                   : ''
               ]"
@@ -81,11 +81,61 @@
             </button>
           </div>
 
+          <div>
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4 mb-2">
+              <div class="flex justify-between items-center text-gray-900 dark:text-white font-semibold">
+                <span>Unidades:</span>
+                <div class="flex items-center space-x-2 mt-2">
+                <button 
+                  @click="decrementQuantity()" 
+                  class="w-10 px-2 py-1 border bg-white dark:bg-transparent border-gray-500 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >-</button>
+                <span class="w-8 text-center text-gray-900 dark:text-white">
+                  {{ store.getCurrentPurchase.quantity }}
+                </span>
+                <button 
+                  @click="incrementQuantity()" 
+                  class="w-10 px-2 py-1 border bg-white dark:bg-transparent border-gray-500 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >+</button>
+            </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-gray-900 dark:text-white font-semibold">
+                <span>Precio unitario:</span>
+                <span>${{ formatPrice(productPrice) }}</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between text-gray-900 dark:text-white font-semibold">
+              <span>Envío:</span>
+              <div class="w-1/2 relative text-end">
+                <span 
+                  :class="{ 
+                  'transition-opacity duration-500': true,
+                  'opacity-0': showFreeShippingAnimation && shippingCost === 0,
+                  'opacity-100': !showFreeShippingAnimation || shippingCost > 0,
+                  ' p-1 rounded-md': shippingCost === 0
+                }">
+                  {{ shippingCost === 0 ? 'Gratis 🎉' : '$' + formatPrice(shippingCost) }}
+                </span>
+                <span v-if="showFreeShippingAnimation && shippingCost === 0"
+                      class="absolute top-0 right-0 text-green-500 font-bold animate-bounce">
+                  ¡Envío Gratis! 🎉
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-gray-900 dark:text-white font-semibold">
+                <span>Total:</span>
+                <span>${{ formatPrice(store.getCurrentPurchase.quantity * productPrice + shippingCost) }}</span>
+              </div>
+            </div>
+          </div>
+
           <div class="space-y-4">
-            <button @click="addToCart" 
-                    class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors">
-              Agregar al Carrito
-            </button>
             <button @click="handleBuyNow(selectedQuantity)" 
                     class="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition-colors">
               Comprar Ahora
@@ -166,8 +216,9 @@
     <!-- Purchase Dialog -->
     <PurchaseDialog 
       v-if="showPurchaseDialog" 
-      :product="product"
-      :quantity="selectedQuantity"
+      :quantity="store.getCurrentPurchase.quantity"
+      :total="purchaseTotal"
+      :cartMode="false"
       @close="showPurchaseDialog = false"
       @purchase="handlePurchase"
     />
@@ -176,6 +227,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import confetti from 'canvas-confetti'
 import { useProductStore } from '../stores/products'
 import { logAnalyticsEvent } from '../firebase'
 import { metaPixelEvents } from '../utils/metaPixel'
@@ -189,41 +241,29 @@ import FAQSection from '../components/FAQSection.vue'
 import BuyerReviews from '../components/BuyerReviews.vue'
 import Footer from '../components/Footer.vue'
 
-// Import product images
-import productImage1 from '../assets/images/product/image-1.webp'
-import productImage2 from '../assets/images/product/image-2.webp'
-import productImage3 from '../assets/images/product/image-3.webp'
-import productImage4 from '../assets/images/product/image-4.webp'
-
 const store = useProductStore()
 const showPurchaseDialog = ref(false)
 const selectedQuantity = ref(1)
+const showFreeShippingAnimation = ref(false)
+const confettiAnimationShowed = ref(false)
 
-const basePrice = 39900
+const purchaseTotal = computed(() => {
+  return store.getCurrentPurchase.price * store.getCurrentPurchase.quantity
+})
 
-const quantityOptions = [
-  { quantity: 1, price: basePrice, savings: 0 },
-  { quantity: 3, price: basePrice * 0.95, savings: 5 },
-  { quantity: 5, price: basePrice * 0.90, savings: 10 },
-]
+const productPrice = computed(() => {
+  let price = store.product.price
+  if (store.getCurrentPurchase.quantity >= 5) {
+    price = price * 0.90
+  } else if (store.getCurrentPurchase.quantity >= 3) {
+    price = price * 0.95
+  }
+  return price
+})
 
-const product = {
-  id: 1,
-  name: "Planeador semanal acrilico",
-  price: basePrice,
-  images: [
-    productImage1,
-    productImage2,
-    productImage3,
-    productImage4
-  ],
-  features: [
-    "✨ Diseño Elegante",
-    "📝 Fácil de Usar",
-    "🔄 Reutilizable",
-    "📅 Vista Semanal",
-  ]
-}
+const shippingCost = computed(() => {
+  return purchaseTotal.value > 120000 ? 0 : 10500
+})
 
 const formatPrice = (price) => {
   return price.toLocaleString('es-CO', {
@@ -234,39 +274,84 @@ const formatPrice = (price) => {
 
 const selectQuantity = (option) => {
   selectedQuantity.value = option.quantity
-  product.price = option.price
+  store.setPurchasePrice(option.price)
+  store.setPurchaseQuantity(option.quantity)
+  if (purchaseTotal.value < 120000 ) {
+    confettiAnimationShowed.value = false
+  }
+  checkAndTriggerFreeShipping()
 }
 
-const addToCart = () => {
-  logAnalyticsEvent('add_to_cart', {
-    currency: 'COP',
-    value: product.price * selectedQuantity.value,
-    items: [{
-      item_id: product.id,
-      item_name: product.name,
-      price: product.price,
-      quantity: selectedQuantity.value
-    }]
-  });
+const triggerConfetti = () => {
+  const end = Date.now() + 1000
 
-  metaPixelEvents.addToCart(product, selectedQuantity.value);
-  
-  store.addToCart(product, selectedQuantity.value);
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffa500', '#6a5acd','#3cb371']
+
+  ;(function frame() {
+    confetti({
+      particleCount: 6,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.8 },
+      colors: colors
+    })
+    confetti({
+      particleCount: 6,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.8 },
+      colors: colors
+    })
+
+    if (Date.now() < end) {
+      requestAnimationFrame(frame)
+    }
+  }())
+}
+
+const checkAndTriggerFreeShipping = () => {
+  if (!confettiAnimationShowed.value && purchaseTotal.value > 120000) {
+    showFreeShippingAnimation.value = true
+    confettiAnimationShowed.value = true
+    triggerConfetti()
+    setTimeout(() => {
+      showFreeShippingAnimation.value = false
+    }, 3000)
+  }
+}
+
+const incrementQuantity = () => {
+  if (store.getCurrentPurchase.quantity >= 30) {
+    return
+  }
+  store.setPurchaseQuantity(store.getCurrentPurchase.quantity + 1)
+  checkAndTriggerFreeShipping()
+}
+
+const decrementQuantity = () => {
+  if (store.getCurrentPurchase.quantity <= 1) {
+    return
+  }
+  store.setPurchaseQuantity(store.getCurrentPurchase.quantity - 1)
+  if (purchaseTotal.value < 120000 ) {
+    confettiAnimationShowed.value = false
+  }
+  checkAndTriggerFreeShipping()
 }
 
 const handleBuyNow = (quantity) => {
   logAnalyticsEvent('begin_checkout', {
     currency: 'COP',
-    value: product.price * quantity,
+    value: store.product.price * quantity,
     items: [{
-      item_id: product.id,
-      item_name: product.name,
-      price: product.price,
+      item_id: store.product.id,
+      item_name: store.product.name,
+      price: store.product.price,
       quantity: quantity
     }]
   });
 
-  metaPixelEvents.initiateCheckout(product, quantity);
+  metaPixelEvents.initiateCheckout(store.product, quantity);
   
   showPurchaseDialog.value = true;
 };
@@ -290,6 +375,6 @@ onMounted(() => {
     page_location: window.location.href
   });
 
-  metaPixelEvents.viewContent(product);
+  metaPixelEvents.viewContent();
 });
 </script>

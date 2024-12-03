@@ -23,12 +23,6 @@
               </svg>
               <span class="text-gray-700 dark:text-gray-300">Reembolso del 100%</span>
             </div>
-            <div class="flex items-center space-x-3">
-              <svg class="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-gray-700 dark:text-gray-300">Envío de devolución gratis</span>
-            </div>
           </div>
           <div class="pt-6">
             <p class="text-sm text-gray-500 dark:text-gray-400">

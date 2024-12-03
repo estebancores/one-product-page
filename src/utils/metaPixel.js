@@ -7,13 +7,11 @@ export const trackMetaEvent = (eventName, parameters = {}) => {
 
 // Common Meta Pixel Events
 export const metaPixelEvents = {
-  viewContent: (content) => {
+  viewContent: () => {
     trackMetaEvent('ViewContent', {
       content_type: 'product',
-      content_ids: [content.id],
-      content_name: content.name,
+      content_name: "Planeador semanal acrilico",
       currency: 'COP',
-      value: content.price
     });
   },
 

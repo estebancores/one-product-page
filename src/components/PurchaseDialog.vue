@@ -75,6 +75,13 @@
 
         <div>
           <div class="flex justify-between text-gray-900 dark:text-white font-semibold">
+            <span>Envío:</span>
+            <span>${{ formatPrice(shippingCost) }}</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-gray-900 dark:text-white font-semibold">
             <span>Total:</span>
             <span>${{ formatPrice(productTotal) }}</span>
           </div>
@@ -104,15 +111,13 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useProductStore } from '../stores/products'
+const store = useProductStore()
 
 const props = defineProps({
   cartMode: {
     type: Boolean,
     default: false
-  },
-  product: {
-    type: Object,
-    default: null
   },
   total: {
     type: Number,
@@ -124,22 +129,25 @@ const props = defineProps({
   }
 })
 
-const calculateItemPrice = (quantity, basePrice = 39900) => {
+const calculateItemPrice = (quantity) => {
   if (quantity >= 5) {
-    return basePrice * 0.90 // 10% discount
+    return store.product.price * 0.90 // 10% discount
   } else if (quantity >= 3) {
-    return basePrice * 0.95 // 5% discount
+    return store.product.price * 0.95 // 5% discount
   }
-  return basePrice
+  return store.product.price
 }
+
+const shippingCost = computed(() => {
+  return calculateItemPrice(props.quantity) * props.quantity > 120000 ? 0 : 10500
+})
 
 const productTotal = computed(() => {
   if (props.cartMode) {
     return props.total
   }
-  const basePrice = 39900
-  const price = calculateItemPrice(props.quantity, basePrice)
-  return price * props.quantity
+  const price = calculateItemPrice(props.quantity)
+  return price * props.quantity + shippingCost.value
 })
 
 const formatPrice = (price) => {
@@ -182,7 +190,6 @@ const handleSubmit = () => {
     ...formData.value,
     total: productTotal.value,
     quantity: props.quantity,
-    items: props.cartMode ? 'Cart Items' : props.product
   }
   
   // Generate WhatsApp link and redirect

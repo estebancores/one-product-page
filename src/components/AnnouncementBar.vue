@@ -27,7 +27,6 @@ import { ref, onMounted, onUnmounted } from 'vue'
 const announcements = [
   { text: "Envío gratis por compras superiores a $120.000" },
   { text: "⚡🕒 $39.900 Oferta por tiempo limitado 🕒⚡" },
-  { text: "¡Ahorra de verdad usando el selector de cantidades!" },
 ]
 
 const currentIndex = ref(0)
