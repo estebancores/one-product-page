@@ -167,6 +167,7 @@ const generateWhatsAppMessage = (purchaseData) => {
     `*Detalles del Pedido:*\n` +
     `- Cantidad: ${purchaseData.quantity}\n` +
     `- Precio unitario: $${formatPrice(calculateItemPrice(purchaseData.quantity))}\n` +
+    `- Envío: $${formatPrice(shippingCost.value)}\n` +
     `- Total: $${formatPrice(purchaseData.total)}\n\n` +
     `--------------------------------------`
 
