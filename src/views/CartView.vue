@@ -96,6 +96,7 @@
       v-if="showPurchaseDialog" 
       :cart-mode="true"
       :total="finalTotal"
+      :quantity="store.getCartItemCount"
       @close="showPurchaseDialog = false"
       @purchase="handlePurchase"
     />
