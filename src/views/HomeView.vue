@@ -286,18 +286,8 @@ const handlePurchase = (purchaseDetails) => {
 
 onMounted(() => {
   logAnalyticsEvent('page_view', {
-    page_title: 'Home',
+    page_title: 'Planner Page',
     page_location: window.location.href
-  });
-
-  logAnalyticsEvent('view_item', {
-    currency: 'COP',
-    value: product.price,
-    items: [{
-      item_id: product.id,
-      item_name: product.name,
-      price: product.price
-    }]
   });
 
   metaPixelEvents.viewContent(product);

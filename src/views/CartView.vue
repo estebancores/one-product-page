@@ -103,10 +103,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useProductStore } from '../stores/products'
 import { logAnalyticsEvent } from '../firebase'
-import { metaPixelEvents } from '../utils/metaPixel'
+import { trackMetaEvent } from '../utils/metaPixel'
 import PurchaseDialog from '../components/PurchaseDialog.vue'
 import confetti from 'canvas-confetti'
 
@@ -116,7 +116,7 @@ const basePrice = 39900
 const store = useProductStore()
 const showPurchaseDialog = ref(false)
 const showFreeShippingAnimation = ref(false)
-const previousTotal = ref(0)
+const confettiAnimationShowed = ref(false)
 
 const formatPrice = (price) => {
   return price.toLocaleString('es-CO', {
@@ -179,8 +179,9 @@ const triggerConfetti = () => {
 }
 
 const checkAndTriggerFreeShipping = () => {
-  if (cartTotal.value > 120000) {
+  if (!confettiAnimationShowed.value && cartTotal.value > 120000) {
     showFreeShippingAnimation.value = true
+    confettiAnimationShowed.value = true
     triggerConfetti()
     setTimeout(() => {
       showFreeShippingAnimation.value = false
@@ -205,7 +206,7 @@ onMounted(() => {
   });
 
   // Track cart view - Meta Pixel
-  metaPixelEvents.trackMetaEvent('ViewCart', {
+  trackMetaEvent('ViewCart', {
     content_type: 'product',
     content_ids: cartItems.value.map(item => item.id),
     contents: cartItems.value.map(item => ({
@@ -219,57 +220,20 @@ onMounted(() => {
 });
 
 const incrementQuantity = (item) => {
-  // Track add to cart - Firebase
-  logAnalyticsEvent('add_to_cart', {
-    currency: 'COP',
-    value: item.price,
-    items: [{
-      item_id: item.id,
-      item_name: item.name,
-      price: item.price,
-      quantity: 1
-    }]
-  });
-
-  // Track add to cart - Meta Pixel
-  metaPixelEvents.addToCart(item, 1);
-  
   store.updateCartItemQuantity(item.id, item.quantity + 1)
+  checkAndTriggerFreeShipping()
 }
 
 const decrementQuantity = (item) => {
-  // Track remove from cart - Firebase
-  logAnalyticsEvent('remove_from_cart', {
-    currency: 'COP',
-    value: item.price,
-    items: [{
-      item_id: item.id,
-      item_name: item.name,
-      price: item.price,
-      quantity: 1
-    }]
-  });
-
   store.updateCartItemQuantity(item.id, item.quantity - 1)
+  if (cartTotal.value < 120000 ) {
+    confettiAnimationShowed.value = false
+  }
+  checkAndTriggerFreeShipping()
 }
 
 const removeFromCart = (productId) => {
   const item = cartItems.value.find(item => item.id === productId);
-  
-  if (item) {
-    // Track remove from cart - Firebase
-    logAnalyticsEvent('remove_from_cart', {
-      currency: 'COP',
-      value: item.price * item.quantity,
-      items: [{
-        item_id: item.id,
-        item_name: item.name,
-        price: item.price,
-        quantity: item.quantity
-      }]
-    });
-  }
-  
   store.removeFromCart(productId)
 }
 
@@ -289,7 +253,7 @@ const handlePurchase = (purchaseDetails) => {
   });
 
   // Track purchase - Meta Pixel
-  metaPixelEvents.trackMetaEvent('Purchase', {
+  trackMetaEvent('Purchase', {
     content_type: 'product',
     content_ids: cartItems.value.map(item => item.id),
     contents: cartItems.value.map(item => ({

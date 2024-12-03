@@ -34,6 +34,7 @@
         <div>
           <label class="text-left block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Dirección de Envío
+            <p class="text-xs text-gray-500 dark:text-gray-400">(incluyendo ciudad y barrio)</p>
           </label>
           <textarea 
             v-model="formData.address" 
@@ -43,26 +44,49 @@
           ></textarea>
         </div>
 
+        <div>
+          <label class="text-left block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Método de pago
+          </label>
+          <select 
+            v-model="formData.paymentMethod" 
+            required
+            class="w-full px-1 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          >
+            <option value="Tarjeta de crédito">Tarjeta de Crédito (Mercadopago)</option>
+            <option value="Transferencia bancaria">Transferencia (Nu, Nequi, Bancolombia)</option>
+          </select>
+        </div>
+
         <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mt-4">
+          <div class="flex justify-between text-gray-900 dark:text-white font-semibold">
+            <span>Unidades:</span>
+            <span>{{ quantity }}</span>
+          </div>
+        </div>
+
+        <div>
           <div class="flex justify-between text-gray-900 dark:text-white font-semibold">
             <span>Total:</span>
             <span>${{ formatPrice(productTotal) }}</span>
           </div>
         </div>
 
-        <div class="flex space-x-3">
+        <div>
+          
+          <button
+            type="submit"
+            class="w-full px-4 py-2 bg-green-600 dark:bg-blue-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
+          >
+            Confirmar Compra
+          </button>
+
           <button 
             type="button" 
             @click="$emit('close')"
-            class="flex-1 px-4 py-2 border bg-white border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="mt-2 w-full text-sm px-4 py-2 border bg-white text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Cancelar
-          </button>
-          <button 
-            type="submit"
-            class="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-          >
-            Confirmar Compra
           </button>
         </div>
       </form>
@@ -121,7 +145,8 @@ const generateWhatsAppMessage = (purchaseData) => {
   const message = `*Nuevo Pedido - Planificador Semanal*\n\n` +
     `*Cliente:* ${purchaseData.name}\n` +
     `*Teléfono:* ${purchaseData.phone}\n` +
-    `*Dirección:* ${purchaseData.address}\n\n` +
+    `*Dirección:* ${purchaseData.address}\n` +
+    `*Metodo de Pago:* ${purchaseData.paymentMethod}\n\n` +
     `--------------------------------------\n` +
     `*Detalles del Pedido:*\n` +
     `- Cantidad: ${purchaseData.quantity}\n` +
@@ -140,7 +165,8 @@ const emit = defineEmits(['close', 'purchase'])
 const formData = ref({
   name: '',
   phone: '',
-  address: ''
+  address: '',
+  paymentMethod: ''
 })
 
 const handleSubmit = () => {

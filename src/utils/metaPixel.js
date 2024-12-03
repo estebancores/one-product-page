@@ -1,8 +1,8 @@
 // Meta Pixel Event Tracking
 export const trackMetaEvent = (eventName, parameters = {}) => {
-  if (window.fbq) {
-    window.fbq('track', eventName, parameters);
-  }
+  // if (window.fbq) {
+  //   window.fbq('track', eventName, parameters);
+  // }
 };
 
 // Common Meta Pixel Events
