@@ -365,7 +365,14 @@ const handleWhatsAppClick = () => {
 };
 
 const handlePurchase = (purchaseDetails) => {
-  console.log('Purchase details:', purchaseDetails)
+
+  logAnalyticsEvent('purchase_confirmed', {
+    source: 'purchase_dialog',
+    currency: 'COP',
+    value: purchaseDetails.total,
+  });
+
+  metaPixelEvents.purchaseConfirmed(purchaseDetails.total, purchaseDetails.quantity);
   showPurchaseDialog.value = false
 }
 

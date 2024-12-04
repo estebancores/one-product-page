@@ -15,16 +15,6 @@ export const metaPixelEvents = {
     });
   },
 
-  addToCart: (product, quantity) => {
-    trackMetaEvent('AddToCart', {
-      content_type: 'product',
-      content_ids: [product.id],
-      content_name: product.name,
-      currency: 'COP',
-      value: product.price * quantity
-    });
-  },
-
   initiateCheckout: (product, quantity) => {
     trackMetaEvent('InitiateCheckout', {
       content_type: 'product',
@@ -33,6 +23,15 @@ export const metaPixelEvents = {
       currency: 'COP',
       value: product.price * quantity,
       num_items: quantity
+    });
+  },
+
+  purchaseConfirmed: (total, quantity) => {
+    trackMetaEvent('PurchaseConfirmed', {
+      content_type: 'purchase',
+      currency: 'COP',
+      quantity: quantity,
+      total: total,
     });
   },
 
