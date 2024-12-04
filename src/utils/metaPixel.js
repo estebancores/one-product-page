@@ -27,11 +27,11 @@ export const metaPixelEvents = {
   },
 
   purchaseConfirmed: (total, quantity) => {
-    trackMetaEvent('PurchaseConfirmed', {
+    trackMetaEvent('Purchase', {
       content_type: 'purchase',
       currency: 'COP',
-      quantity: quantity,
-      total: total,
+      value: total,
+      num_items: quantity
     });
   },
 
