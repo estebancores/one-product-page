@@ -370,6 +370,7 @@ const handlePurchase = (purchaseDetails) => {
     source: 'purchase_dialog',
     currency: 'COP',
     value: purchaseDetails.total,
+    quantity: purchaseDetails.quantity
   });
 
   metaPixelEvents.purchaseConfirmed(purchaseDetails.total, purchaseDetails.quantity);
